@@ -1,5 +1,3 @@
-
-
 import os
 import re
 import cv2
@@ -20,7 +18,7 @@ if os.name == "nt":
     if os.path.exists(tess_path):
         pytesseract.pytesseract.tesseract_cmd = tess_path
 
-SSN_REGEX = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+SSN_REGEX = re.compile(r"\b\d{3}[- ]?\d{2}[- ]?\d{4}\b")
 DATE_REGEX = re.compile(r"\b(?:\d{1,2}[\-/]){2}\d{2,4}\b")
 
 def detect_and_mask(img, hide_types):
@@ -39,15 +37,17 @@ def detect_and_mask(img, hide_types):
             label = "SSN"
         elif "DOB" in hide_types and DATE_REGEX.search(text):
             label = "DOB"
-        elif "NAME" in hide_types and text.istitle():
+        elif "NAME" in hide_types and (text.isalpha() and text.isupper() or text.istitle()):
             label = "NAME"
 
         if label:
+            # White rectangle
             cv2.rectangle(out, (x, y), (x+w, y+h), (255, 255, 255), thickness=-1)
 
+            # Overlay mask text
             mask_text = "XXXXX"
             font = cv2.FONT_HERSHEY_SIMPLEX
-            scale = max(0.6, h / 25)  
+            scale = max(0.6, h / 25)
             thickness = 2
             (tw, th), _ = cv2.getTextSize(mask_text, font, scale, thickness)
 
@@ -62,7 +62,6 @@ app = Flask(__name__, template_folder="templates", static_folder=os.path.join(AP
 app.secret_key = "dev-secret"
 
 ALLOWED_IMG = {"png", "jpg", "jpeg"}
-ALLOWED_TXT = {"txt"}
 
 def allowed_file(filename, allowed_set):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_set
@@ -74,31 +73,19 @@ def index():
 @app.route("/process", methods=["POST"])
 def process():
     file_img = request.files.get("image")
-    file_txt = request.files.get("rules")
+    hide_types = request.form.getlist("rules")  # from checkboxes
 
     if not file_img or not allowed_file(file_img.filename, ALLOWED_IMG):
         flash("Invalid or missing image file")
         return redirect(url_for("index"))
 
-    if not file_txt or not allowed_file(file_txt.filename, ALLOWED_TXT):
-        flash("Invalid or missing text file")
+    if not hide_types:
+        flash("Please select at least one masking option")
         return redirect(url_for("index"))
 
     img_name = secure_filename(file_img.filename)
-    txt_name = secure_filename(file_txt.filename)
-
     img_path = os.path.join(UPLOAD_DIR, img_name)
-    txt_path = os.path.join(UPLOAD_DIR, txt_name)
-
     file_img.save(img_path)
-    file_txt.save(txt_path)
-
-    with open(txt_path, "r", encoding="utf-8") as f:
-        content = f.read().upper()
-    hide_types = set()
-    if "SSN" in content: hide_types.add("SSN")
-    if "DOB" in content: hide_types.add("DOB")
-    if "NAME" in content: hide_types.add("NAME")
 
     img = cv2.imdecode(np.frombuffer(open(img_path, 'rb').read(), np.uint8), cv2.IMREAD_COLOR)
     masked = detect_and_mask(img, hide_types)
