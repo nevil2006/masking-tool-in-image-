@@ -70,7 +70,7 @@ README.md          # This file
 4. Select the fields you want to mask (SSN, DOB, Name).
 5. Download your masked document.
 
-![Dashboard Preview](output.png.png)
+![Dashboard Preview](ouput.png.png)
 
 
 ## Notes
@@ -78,6 +78,7 @@ README.md          # This file
 - Make sure Tesseract OCR is properly installed and the path is configured in `app.py`.
 - Supports image formats: PNG, JPG, JPEG.
 - The masking is performed by detecting text regions using OCR; accuracy depends on image quality.
+
 
 
 
