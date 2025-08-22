@@ -76,6 +76,4 @@ README.md          # This file
 - Supports image formats: PNG, JPG, JPEG.
 - The masking is performed by detecting text regions using OCR; accuracy depends on image quality.
 
-## License
 
-MIT
