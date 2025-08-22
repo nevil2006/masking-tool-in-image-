@@ -1,4 +1,4 @@
-# ID Document Masking Tool
+ # ID Document Masking Tool
 
 A web-based tool for masking sensitive information (SSN, Date of Birth, Name) in ID document images using OCR and computer vision.
 
@@ -70,7 +70,7 @@ README.md          # This file
 4. Select the fields you want to mask (SSN, DOB, Name).
 5. Download your masked document.
 
-![Dashboard Preview](output.png)
+![Dashboard Preview](output.png.png)
 
 
 ## Notes
@@ -78,6 +78,7 @@ README.md          # This file
 - Make sure Tesseract OCR is properly installed and the path is configured in `app.py`.
 - Supports image formats: PNG, JPG, JPEG.
 - The masking is performed by detecting text regions using OCR; accuracy depends on image quality.
+
 
 
 
